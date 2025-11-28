@@ -1,0 +1,12 @@
+services:
+  backend:
+    build: ./better-tictactoe-api
+    ports:
+      - "3001:3001"
+
+  frontend:
+    build: ./better-tictactoe-front-end
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
