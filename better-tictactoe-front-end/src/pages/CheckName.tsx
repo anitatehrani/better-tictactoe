@@ -4,9 +4,11 @@ import {BaseResponse} from "../interfaces";
 export function CheckName() {
     const [name, setName] = useState("");
     const [result, setResult] = useState<BaseResponse | null>(null);
+    const [loading, setLoading] = useState(false);
 
     function submit() {
         setResult(null);
+        setLoading(true);
 
         fetch("http://localhost:3001/info/validate", {
             method: "POST",
@@ -14,7 +16,8 @@ export function CheckName() {
             body: JSON.stringify({name})
         })
             .then((res) => res.json())
-            .then((json) => setResult(json));
+            .then((json) => setResult(json))
+            .finally(() => setLoading(false));
     }
 
     return (
@@ -32,8 +35,16 @@ export function CheckName() {
                     />
                 </div>
 
-                <button style={styles.button} onClick={submit}>
-                    Validate
+                <button
+                    style={{
+                        ...styles.button,
+                        opacity: loading ? 0.6 : 1,
+                        cursor: loading ? "not-allowed" : "pointer"
+                    }}
+                    disabled={loading}
+                    onClick={submit}
+                >
+                    {loading ? "Validating..." : "Validate"}
                 </button>
             </div>
 
@@ -44,8 +55,8 @@ export function CheckName() {
                     </h3>
 
                     <pre style={styles.pre}>
-            {JSON.stringify(result, null, 2)}
-          </pre>
+                        {JSON.stringify(result, null, 2)}
+                    </pre>
                 </div>
             )}
         </div>

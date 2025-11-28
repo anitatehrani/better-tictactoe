@@ -10,6 +10,7 @@ export function CheckUser() {
     });
 
     const [result, setResult] = useState<BaseResponse | null>(null);
+    const [loading, setLoading] = useState(false);
 
     function update(field: string, value: string) {
         setForm((f) => ({...f, [field]: value}));
@@ -17,6 +18,7 @@ export function CheckUser() {
 
     function submit() {
         setResult(null);
+        setLoading(true);
 
         fetch("http://localhost:3001/info/validate-details", {
             method: "POST",
@@ -24,12 +26,16 @@ export function CheckUser() {
             body: JSON.stringify({
                 name: form.name,
                 age: Number(form.age),
-                married: form.married === "" ? undefined : form.married === "yes",
+                married:
+                    form.married === ""
+                        ? undefined
+                        : form.married === "yes",
                 dateOfBirth: form.dateOfBirth
             })
         })
             .then((res) => res.json())
-            .then((json) => setResult(json));
+            .then((json) => setResult(json))
+            .finally(() => setLoading(false));
     }
 
     return (
@@ -81,18 +87,30 @@ export function CheckUser() {
                     />
                 </div>
 
-                <button style={styles.button} onClick={submit}>
-                    Validate
+                <button
+                    style={{
+                        ...styles.button,
+                        opacity: loading ? 0.6 : 1,
+                        cursor: loading ? "not-allowed" : "pointer"
+                    }}
+                    disabled={loading}
+                    onClick={submit}
+                >
+                    {loading ? "Validating..." : "Validate"}
                 </button>
             </div>
 
             {result && (
                 <div style={styles.resultBox}>
                     <h3 style={styles.resultTitle}>
-                        {result.success ? "Validation Successful" : "Validation Errors"}
+                        {result.success
+                            ? "Validation Successful"
+                            : "Validation Errors"}
                     </h3>
 
-                    <pre style={styles.pre}>{JSON.stringify(result, null, 2)}</pre>
+                    <pre style={styles.pre}>
+                        {JSON.stringify(result, null, 2)}
+                    </pre>
                 </div>
             )}
         </div>
@@ -160,4 +178,3 @@ const styles: { [key: string]: React.CSSProperties } = {
         overflowX: "auto"
     }
 };
-
